@@ -29,15 +29,21 @@
         if (box) {
             if (compressedImage) {
                 CGFloat scale = (compressedImage.size.height > compressedImage.size.width) ? compressedImage.size.height * compressedImage.scale / (self.imageFile.size.height * self.imageFile.scale) : compressedImage.size.width * compressedImage.scale / (self.imageFile.size.width * self.imageFile.scale);
-                [dict setValue: [NSString stringWithFormat:@"%d,%d,%d,%d", (int)(scale * box.x1), (int)(scale * box.y1), (int)(scale * box.x2), (int)(scale * box.y2)]  forKey:@"box"];
+                [dict setValue:[self httpBodyFormatForBox:box scale:scale]  forKey:@"box"];
             } else {
-                [dict setValue: [NSString stringWithFormat:@"%d,%d,%d,%d", box.x1, box.y1, box.x2, box.y2]  forKey:@"box"];
+                [dict setValue:[self httpBodyFormatForBox:box scale:1]  forKey:@"box"];
             }
         }
     }else if (imageUrl != nil) {
         [dict setValue:imageUrl forKey:@"im_url"];
+        if (box) {
+            [dict setValue:[self httpBodyFormatForBox:box scale:1]  forKey:@"box"];
+        }
     }else if (imId) {
         [dict setValue:imId forKey:@"im_id"];
+        if (box) {
+            [dict setValue:[self httpBodyFormatForBox:box scale:1]  forKey:@"box"];
+        }
     }
     
     if (detectionLimit > 0) {
@@ -53,6 +59,10 @@
     }
     
     return dict;
+}
+
+- (NSString*)httpBodyFormatForBox:(Box*) box scale: (CGFloat) scale {
+    return [NSString stringWithFormat:@"%d,%d,%d,%d", (int)(scale * box.x1), (int)(scale * box.y1), (int)(scale * box.x2), (int)(scale * box.y2)];
 }
 
 - (NSData *)httpPostBodyWithObject:(id)object {
